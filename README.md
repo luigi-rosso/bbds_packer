@@ -1,5 +1,5 @@
 # BeatBuddy Drum Kit Packer
-A tool for packing BeatBuddy drum kits from a simple markup text definitino files. 
+A tool for packing BeatBuddy drum kits from a simple markup text definition files. 
 
 ## Why
 BBManager was a little too tedious and error prone.
