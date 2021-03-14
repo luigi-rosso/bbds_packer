@@ -1,0 +1,27 @@
+name: Circle Sample Kit
+volume: 100
+instruments:
+  - name: Kick
+    midi: 36
+    choke: 3
+    poly: 3
+    percussion: true
+    volume: 90
+    fillChoke: 3
+    fillChokeDelay: 2
+    samples:
+      20: circle_free_samples/BILLY KICK V8 - A.wav
+      80: circle_free_samples/PILLOW KICK V5 - A.wav
+      127: circle_free_samples/Z - DEVIL KICK.wav
+  - name: Snare
+    midi: 38
+    choke: 3
+    poly: 3
+    percussion: true
+    volume: 0.9
+    fillChoke: 3
+    fillChokeDelay: 2
+    samples:
+        22: circle_free_samples/BRONZE SNARE V8 - A.wav
+        80: circle_free_samples/PUFF SNARE V5 - A.wav
+        127: circle_free_samples/SIZZLE SNARE MED - A.wav
