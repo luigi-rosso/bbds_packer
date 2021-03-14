@@ -9,6 +9,9 @@ BBManager was a little too tedious and error prone.
 ## Steps to use
 These are for Mac but if someone wants to PR windows ones, they should be similar.
 
+## Online Version
+Just drag and drop a folder containing your yaml file and samples to: https://luigi-rosso.github.io/bbds_packer/bbds_web/build/web/
+
 ### Get Dart
 Get dart if you don't have it. Easiest option is homebrew on Mac but you can download it from https://dart.dev/get-dart
 ```
