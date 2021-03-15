@@ -112,60 +112,62 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                js.context.callMethod(
-                  'travel',
-                  <dynamic>[
-                    'https://github.com/luigi-rosso/bbds_packer',
-                  ],
-                );
-              },
-              child: const Text(
-                'See details here.',
-                style: TextStyle(
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  js.context.callMethod(
+                    'travel',
+                    <dynamic>[
+                      'https://github.com/luigi-rosso/bbds_packer',
+                    ],
+                  );
+                },
+                child: const Text(
+                  'See details here.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            _error != null
-                ? Text(
-                    _error,
-                    style: const TextStyle(
-                      fontSize: 20,
-                    ),
-                  )
-                : _isPacking
-                    ? const Text(
-                        'Packing...',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      )
-                    : const Text(
-                        'Drag and drop a folder containing your drumset '
-                        'definition file and wav files. The drm file will be '
-                        'generated and downloaded.',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
+              const SizedBox(height: 20),
+              _error != null
+                  ? Text(
+                      _error,
+                      style: const TextStyle(
+                        fontSize: 20,
                       ),
-            const SizedBox(height: 20),
-            const Text(
-              'No files are uploaded. All files dropped on this window are '
-              'processed locally in your browser\'s memory to pack the drm'
-              'file. If you have concerns, you can monitor the network panel '
-              'to verify.',
-              style: TextStyle(
-                fontSize: 12,
-              ),
-            )
-          ],
+                    )
+                  : _isPacking
+                      ? const Text(
+                          'Packing...',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        )
+                      : const Text(
+                          'Drag and drop a folder containing your drumset '
+                          'definition file and wav files. The drm file will be '
+                          'generated and downloaded.',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+              const SizedBox(height: 20),
+              const Text(
+                'No files are uploaded. All files dropped on this window are '
+                'processed locally in your browser\'s memory to pack the drm'
+                'file. If you have concerns, you can monitor the network panel '
+                'to verify.',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

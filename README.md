@@ -6,11 +6,11 @@ BBManager was a little too tedious and error prone.
 - Lack of drag and drop. Needing to manually enter each sample/velocity file made me wish I could just do it in a text file. 
 - Failed to process WAV files with extra chunks. The method used to find the data chunk can cause false positives (resulting in bad sound data in the drumkit). I ran into the infamous 'empty sound' drum kit issue with any kit I tried to make.
 
-## Steps to use
-These are for Mac but if someone wants to PR windows ones, they should be similar.
-
 ## Online Version
 Just drag and drop a folder containing your yaml file and samples to: https://luigi-rosso.github.io/bbds_packer
+
+## CLI Version
+These are for Mac but if someone wants to PR windows ones, they should be similar.
 
 ### Get Dart
 Get dart if you don't have it. Easiest option is homebrew on Mac but you can download it from https://dart.dev/get-dart
