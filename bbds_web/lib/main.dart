@@ -1,7 +1,51 @@
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:js' as js;
+import 'dart:typed_data';
+
+import 'package:bbds_packer/drum_kit.dart';
+import 'package:bbds_packer/drum_kit_packer.dart';
+import 'package:bbds_packer/file_io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
+  js.context['filesDropped'] = (dynamic test) {
+    if (test is! js.JsArray) {
+      return;
+    }
+    List<DroppedFile> droppedFiles = [];
+    for (final item in test as js.JsArray) {
+      if (item is! js.JsObject) {
+        continue;
+      }
+      var object = item as js.JsObject;
+      var filename =
+          object['filename'] is String ? object['filename'] as String : null;
+      var bytes =
+          object['bytes'] is Uint8List ? object['bytes'] as Uint8List : null;
+      if (filename != null && bytes != null) {
+        droppedFiles.add(DroppedFile(filename, bytes));
+      }
+    }
+    filesDropped?.call(droppedFiles);
+  };
   runApp(MyApp());
+}
+
+DroppedFilesCallback filesDropped;
+
+typedef DroppedFilesCallback = void Function(Iterable<DroppedFile> files);
+
+class DroppedFile {
+  final String filename;
+  final Uint8List bytes;
+
+  DroppedFile(this.filename, this.bytes);
+
+  @override
+  String toString() => 'File: $filename ${bytes.length}';
 }
 
 class MyApp extends StatelessWidget {
@@ -9,105 +53,178 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'BBds Packer',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.grey,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'BeatBuddy DrumKit Packer'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
+  const MyHomePage({Key key, this.title}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class WebFileIO extends FileIO {
+  final Iterable<DroppedFile> files;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  WebFileIO(this.files);
+
+  @override
+  Uint8List load(String filename) {
+    for (final file in files) {
+      if (file.filename == filename) {
+        return file.bytes;
+      }
+    }
+    return null;
   }
 
   @override
+  void save(String filename, Uint8List bytes) {
+    js.context.callMethod(
+      'saveAs',
+      <dynamic>[
+        html.Blob(
+          <dynamic>[bytes],
+        ),
+        filename,
+      ],
+    );
+  }
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  Iterable<DroppedFile> droppedFiles;
+  bool _isPacking = false;
+  String _error;
+
+  @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: () {
+                js.context.callMethod(
+                  'travel',
+                  <dynamic>[
+                    'https://github.com/luigi-rosso/bbds_packer',
+                  ],
+                );
+              },
+              child: const Text(
+                'See details here.',
+                style: TextStyle(
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            const SizedBox(height: 20),
+            _error != null
+                ? Text(
+                    _error,
+                    style: const TextStyle(
+                      fontSize: 20,
+                    ),
+                  )
+                : _isPacking
+                    ? const Text(
+                        'Packing...',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      )
+                    : const Text(
+                        'Drag and drop a folder containing your drumset '
+                        'definition file and wav files. The drm file will be '
+                        'generated and downloaded.',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+            const SizedBox(height: 20),
+            const Text(
+              'No files are uploaded. All files dropped on this window are '
+              'processed locally in your browser\'s memory to pack the drm'
+              'file. If you have concerns, you can monitor the network panel '
+              'to verify.',
+              style: TextStyle(
+                fontSize: 12,
+              ),
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  @override
+  void initState() {
+    filesDropped = (files) async {
+      setState(() {
+        droppedFiles = files;
+        _error = null;
+        _isPacking = true;
+      });
+
+      await Future<bool>.delayed(
+          const Duration(milliseconds: 20), () => _packFiles(files));
+
+      setState(() {
+        _isPacking = false;
+      });
+    };
+    super.initState();
+  }
+
+  Future<bool> _packFiles(Iterable<DroppedFile> files) async {
+    for (final file in files) {
+      if (file.filename.endsWith('.yaml')) {
+        String pathTo = '';
+        String filename = file.filename;
+        if (filename.lastIndexOf('/') != -1) {
+          var lastSlash = filename.lastIndexOf('/');
+          pathTo = filename.substring(0, lastSlash + 1);
+          filename = filename.substring(lastSlash + 1);
+        }
+        String outFilename;
+        if (filename.lastIndexOf('.') != -1) {
+          var lastDot = filename.lastIndexOf('.');
+          outFilename = filename.substring(0, lastDot);
+          outFilename += '.drm';
+        } else {
+          outFilename = '$filename.drm';
+        }
+
+        var yaml = const Utf8Decoder().convert(file.bytes);
+        dynamic data = loadYaml(yaml);
+        if (data is YamlMap) {
+          var io = WebFileIO(files);
+          var kit = Drumkit(data);
+          await kit.loadSamples(io, pathTo);
+
+          var packer = DrumkitPacker(kit);
+          packer.write(io, '$outFilename');
+          return true;
+        }
+        _error = 'Bad formatting in yaml file.';
+        return false;
+      }
+    }
+    _error = 'Failed to find valid yaml file.';
+    return false;
   }
 }

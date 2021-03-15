@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -11,12 +12,12 @@
     Fore more details:
     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
   -->
-  <base href="/bbds_packer/"/>
+  <base href="/bbds_packer/" />
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
-  
+
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -24,22 +25,112 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>bbds_web</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=1408574008');
+    if ('serviceWorker' in navigator)
+    {
+      window.addEventListener('flutter-first-frame', function ()
+      {
+        navigator.serviceWorker.register('flutter_service_worker.js?v=1916848777');
       });
     }
   </script>
+  <script src='https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js'></script>
   <script src="main.dart.js" type="application/javascript"></script>
+  <script>
+    function travel(url)
+    {
+      window.location = url;
+    }
+    document.body.ondragover = function (event)
+    {
+      event.stopPropagation();
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+    };
+
+    document.body.ondragleave = function (event)
+    {
+      event.stopPropagation();
+      event.preventDefault();
+    };
+
+    document.body.ondrop = function (event)
+    {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const fileList = [];
+      let reading = 0;
+
+      function _decReading()
+      {
+        reading--;
+        if (reading == 0 && fileList.length != 0)
+        {
+          filesDropped(fileList);
+        }
+      }
+
+      function traverseFileTree(item, path)
+      {
+        path = path || "";
+        if (item.isFile)
+        {
+          // Get file
+          item.file(function (file)
+          {
+            reading++;
+            var fileReader = new FileReader();
+            fileReader.onload = function ()
+            {
+              const bytes = new Uint8Array(this.result);
+              fileList.push({
+                filename: path + file.name,
+                bytes: bytes
+              });
+              _decReading();
+            };
+            fileReader.onerror = function ()
+            {
+              _decReading();
+            };
+            fileReader.readAsArrayBuffer(file);
+          });
+        } else if (item.isDirectory)
+        {
+          // Get folder contents
+          var dirReader = item.createReader();
+          dirReader.readEntries(function (entries)
+          {
+            for (var i = 0; i < entries.length; i++)
+            {
+              traverseFileTree(entries[i], path + item.name + "/");
+            }
+          });
+        }
+      }
+      var items = event.dataTransfer.items;
+      for (var i = 0; i < items.length; i++)
+      {
+        // webkitGetAsEntry is where the magic happens
+        var item = items[i].webkitGetAsEntry();
+        if (item)
+        {
+          traverseFileTree(item);
+        }
+      }
+    };
+  </script>
 </body>
+
 </html>

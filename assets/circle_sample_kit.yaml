@@ -8,7 +8,7 @@ instruments:
     percussion: true
     volume: 90
     fillChoke: 3
-    fillChokeDelay: 2
+    fillChokeDelay: 1/8
     samples:
       20: circle_free_samples/BILLY KICK V8 - A.wav
       80: circle_free_samples/PILLOW KICK V5 - A.wav
@@ -20,7 +20,7 @@ instruments:
     percussion: true
     volume: 0.9
     fillChoke: 3
-    fillChokeDelay: 2
+    fillChokeDelay: 1/4
     samples:
         22: circle_free_samples/BRONZE SNARE V8 - A.wav
         80: circle_free_samples/PUFF SNARE V5 - A.wav

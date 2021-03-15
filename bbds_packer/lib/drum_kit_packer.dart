@@ -209,9 +209,6 @@ class DrumkitPacker {
     writer.writeUint16(0x1700);
     _crc.add(writer.uint8Buffer);
     writer.writeUint32(_crc.value);
-
-    var file = File(filename);
-    file.writeAsBytesSync(writer.uint8Buffer);
     packedInstruments.forEach(writer.write);
     writer.write(_metadataInfoBuffer);
     writer.write(_extensionHeaderBuffer);

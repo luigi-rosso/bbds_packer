@@ -93,7 +93,23 @@ class Instrument {
     }
     dynamic fillDelayValue = data['fillChokeDelay'];
     if (fillDelayValue is int) {
-      fillChokeDelay = fillDelayValue;
+      fillChokeDelay = fillDelayValue.clamp(0,2);
+    }
+    else if (fillDelayValue is String) {
+      switch(fillDelayValue) {
+        case '1/4':
+        case '1/4th':
+          fillChokeDelay = 0;
+          break;
+        case '1/8':
+        case '1/8th':
+          fillChokeDelay = 1;
+          break;
+        case '1/16':
+        case '1/16th':
+          fillChokeDelay = 2;
+          break;
+      }
     }
 
     dynamic samplesData = data['samples'];
