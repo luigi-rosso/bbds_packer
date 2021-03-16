@@ -36,6 +36,7 @@ class Drumkit {
         }
       }
     }
+    instruments.sort((a, b) => a.midi.compareTo(b.midi));
   }
 
   Future<bool> loadSamples(FileIO io, String basePath) async {
@@ -93,10 +94,9 @@ class Instrument {
     }
     dynamic fillDelayValue = data['fillChokeDelay'];
     if (fillDelayValue is int) {
-      fillChokeDelay = fillDelayValue.clamp(0,2);
-    }
-    else if (fillDelayValue is String) {
-      switch(fillDelayValue) {
+      fillChokeDelay = fillDelayValue.clamp(0, 2);
+    } else if (fillDelayValue is String) {
+      switch (fillDelayValue) {
         case '1/4':
         case '1/4th':
           fillChokeDelay = 0;
@@ -114,32 +114,42 @@ class Instrument {
 
     dynamic samplesData = data['samples'];
     if (samplesData is YamlMap) {
-      if (samplesData.length > Instrument.maxSamples) {
-        throw DrumkitError('Instrument $name has ${samplesData.length} '
-            'samples. Max samples per instrument is ${Instrument.maxSamples}.');
-      }
       for (final sampleData in samplesData.entries) {
         int v;
-        String file;
         if (sampleData.key is int) {
           v = sampleData.key as int;
         } else {
           continue;
         }
         if (sampleData.value is String) {
-          file = sampleData.value as String;
+          samples.add(Sample(sampleData.value as String, v));
+        } else if (sampleData.value is YamlList) {
+          for (final value in sampleData.value) {
+            if (value is String) {
+              samples.add(Sample(value, v));
+            }
+          }
+          continue;
         } else {
           continue;
         }
-
-        samples.add(Sample(file, v));
       }
     }
+    if (samples.length > Instrument.maxSamples) {
+      throw DrumkitError('Instrument $name has ${samplesData.length} '
+          'samples. Max samples per instrument is ${Instrument.maxSamples}.');
+    }
     samples.sort((a, b) => a.velocity.compareTo(b.velocity));
+    var previousVelocity2 = 0;
     var previousVelocity = 0;
     for (final sample in samples) {
-      sample.previousVelocity = previousVelocity;
-      previousVelocity = sample.velocity;
+      if (previousVelocity == sample.velocity) {
+        sample.previousVelocity = previousVelocity2;
+      } else {
+        sample.previousVelocity = previousVelocity;
+        previousVelocity2 = previousVelocity;
+        previousVelocity = sample.velocity;
+      }
     }
   }
 
@@ -163,12 +173,13 @@ class Sample {
 
   @override
   String toString() {
-    return '$velocity:$filename';
+    return '$previousVelocity-$velocity -> $filename';
   }
 
   Future<bool> load(FileIO io, String basePath) async {
     final bytes = io.load('$basePath$filename');
     if (bytes == null) {
+      print('Wav not found: $filename');
       return false;
     }
     var w = Wav();

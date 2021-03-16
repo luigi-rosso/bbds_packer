@@ -43,7 +43,7 @@ class DrumkitPacker {
       }
       var offsetData = _wavOffsets[instrument]!;
 
-      final writer = BinaryWriter();
+      final writer = BinaryWriter(alignment: 524288);
       writer.writeUint16(instrument.choke);
       writer.writeUint16(instrument.poly);
       writer.writeUint32(instrument.samples.length);
@@ -90,7 +90,7 @@ class DrumkitPacker {
 
   /// Returns true if at least one sample got packed into the wav buffer.
   bool _packWav() {
-    var writer = BinaryWriter();
+    var writer = BinaryWriter(alignment: 524288);
     var offset = wavOffset - wavPadding;
     var nextOffset = wavOffset;
     for (final instrument in kit.instruments) {
